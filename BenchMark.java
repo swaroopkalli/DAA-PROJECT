@@ -4,44 +4,41 @@ import javax.swing.JOptionPane;
 public class BenchMark {
     public static void main(String[] args) {
         try {
-            String input = JOptionPane.showInputDialog(
+            String inputMin = JOptionPane.showInputDialog(
                 null,
-                "Enter maximum N (number of queens, min 4):",
+                "Enter minimum N (number of queens, min 5000):",
                 "N-Queens Benchmark",
                 JOptionPane.QUESTION_MESSAGE
             );
-            if (input == null) return;
+            if (inputMin == null) return;
+            int minN = Integer.parseInt(inputMin.trim());
+            if (minN < 5000) throw new NumberFormatException();
 
-            int maxN = Integer.parseInt(input.trim());
-            if (maxN < 4) throw new NumberFormatException();
+            String inputMax = JOptionPane.showInputDialog(
+                null,
+                "Enter maximum N (number of queens, max 100000):",
+                "N-Queens Benchmark",
+                JOptionPane.QUESTION_MESSAGE
+            );
+            if (inputMax == null) return;
+            int maxN = Integer.parseInt(inputMax.trim());
+            if (maxN < minN || maxN > 100000) throw new NumberFormatException();
 
             try (PrintWriter writer = new PrintWriter("nqueens_all_timings.csv")) {
-                writer.println("N,Time_NCSR(ms),Time_MinConflict(ms),Time_Hybrid(ms)");
-                for (int N = 4; N <= maxN; N += Math.max(1, maxN / 10)) {
-                    // NCSR only
-                    NQueensSolver solverNCSR = new NQueensSolver(N);
-                    long startNCSR = System.nanoTime();
-                    solverNCSR.solveNCSROnly();
-                    long endNCSR = System.nanoTime();
-                    double timeNCSR = (endNCSR - startNCSR) / 1_000_000.0;
+                writer.println("N,Time_AdaptiveHybrid(ms)");
+                for (int N = minN; N <= maxN; N += (maxN - minN) / 10) {
+                    NQueensSolver solver = new NQueensSolver(N);
 
-                    // Min-Conflict only
-                    NQueensSolver solverMinConf = new NQueensSolver(N);
-                    long startMinConf = System.nanoTime();
-                    solverMinConf.solveMinConflictOnly();
-                    long endMinConf = System.nanoTime();
-                    double timeMinConf = (endMinConf - startMinConf) / 1_000_000.0;
+                    long start = System.nanoTime();
+                    solver.solveHybridAdaptive();
+                    long end = System.nanoTime();
+                    double duration = (end - start) / 1_000_000.0;
 
-                    // Hybrid (NCSR + Min-Conflict)
-                    NQueensSolver solverHybrid = new NQueensSolver(N);
-                    long startHybrid = System.nanoTime();
-                    solverHybrid.solveHybrid();
-                    long endHybrid = System.nanoTime();
-                    double timeHybrid = (endHybrid - startHybrid) / 1_000_000.0;
-
-                    writer.printf("%d,%.3f,%.3f,%.3f%n", N, timeNCSR, timeMinConf, timeHybrid);
+                    System.out.printf("N=%d solved in %.3f ms%n", N, duration);
+                    writer.printf("%d,%.3f%n", N, duration);
                 }
             }
+
             JOptionPane.showMessageDialog(
                 null,
                 "Benchmark complete!\nResults saved to nqueens_all_timings.csv",
@@ -51,7 +48,7 @@ public class BenchMark {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(
                 null,
-                "Invalid input. Please enter a valid integer >= 4.",
+                "Invalid input. Please enter valid integers: min ≥ 5000, max ≤ 100000, max ≥ min.",
                 "Error",
                 JOptionPane.ERROR_MESSAGE
             );

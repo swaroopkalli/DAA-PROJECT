@@ -10,31 +10,25 @@ public class NQueensSolver {
         this.board = new int[N];
     }
 
-    // Solve using only NCSR (full initialization)
-    public void solveNCSROnly() {
-        ncsrInitialization();
-    }
+    // Adaptive hybrid solve
+    public void solveHybridAdaptive() {
+        int limit = N / 5; // partial NCSR columns
+        int maxSteps = N * N; // max total Min-Conflict steps
 
-    // Solve using only Min-Conflict with random initialization
-    public void solveMinConflictOnly() {
-        randomInitialization();
-        minimumConflicts();
-    }
+        // Initial partial NCSR initialization
+        ncsrInitializationPartial(limit);
 
-    // Solve using Hybrid: partial NCSR + Min-Conflict
-    public void solveHybrid() {
-        ncsrInitializationLimited();
-        minimumConflicts();
-    }
+        int stepsSinceImprovement = 0;
+        int previousConflicts = totalConflicts();
 
-    public int[] getBoard() {
-        return board;
-    }
+        for (int step = 0; step < maxSteps; step++) {
+            List<Integer> conflictedCols = getConflictedColumns();
+            if (conflictedCols.isEmpty()) return; // solved
 
-    private void ncsrInitialization() {
-        for (int col = 0; col < N; col++) {
+            int col = conflictedCols.get(random.nextInt(conflictedCols.size()));
             int minConflicts = Integer.MAX_VALUE;
             List<Integer> bestRows = new ArrayList<>();
+
             for (int row = 0; row < N; row++) {
                 board[col] = row;
                 int conflicts = countConflicts(col);
@@ -47,12 +41,26 @@ public class NQueensSolver {
                 }
             }
             board[col] = bestRows.get(random.nextInt(bestRows.size()));
+
+            int currentConflicts = totalConflicts();
+            if (currentConflicts < previousConflicts) {
+                stepsSinceImprovement = 0; // reset on improvement
+                previousConflicts = currentConflicts;
+            } else {
+                stepsSinceImprovement++;
+            }
+
+            // If stuck for 2*N steps, reshuffle partial board again with NCSR
+            if (stepsSinceImprovement >= 2 * N) {
+                ncsrInitializationPartial(limit);
+                stepsSinceImprovement = 0;
+                previousConflicts = totalConflicts();
+            }
         }
     }
 
-    // NCSR for first n/5 columns, rest random
-    private void ncsrInitializationLimited() {
-        int limit = N / 5;
+    // Partial NCSR initialization on first 'limit' columns
+    private void ncsrInitializationPartial(int limit) {
         for (int col = 0; col < limit; col++) {
             int minConflicts = Integer.MAX_VALUE;
             List<Integer> bestRows = new ArrayList<>();
@@ -69,39 +77,18 @@ public class NQueensSolver {
             }
             board[col] = bestRows.get(random.nextInt(bestRows.size()));
         }
+        // For remaining columns random init
         for (int col = limit; col < N; col++) {
             board[col] = random.nextInt(N);
         }
     }
 
-    private void randomInitialization() {
+    private int totalConflicts() {
+        int total = 0;
         for (int col = 0; col < N; col++) {
-            board[col] = random.nextInt(N);
+            total += countConflicts(col);
         }
-    }
-
-    private void minimumConflicts() {
-        int maxSteps = N * N;
-        for (int step = 0; step < maxSteps; step++) {
-            List<Integer> conflictedCols = getConflictedColumns();
-            if (conflictedCols.isEmpty()) return;
-
-            int col = conflictedCols.get(random.nextInt(conflictedCols.size()));
-            int minConflicts = Integer.MAX_VALUE;
-            List<Integer> bestRows = new ArrayList<>();
-            for (int row = 0; row < N; row++) {
-                board[col] = row;
-                int conflicts = countConflicts(col);
-                if (conflicts < minConflicts) {
-                    minConflicts = conflicts;
-                    bestRows.clear();
-                    bestRows.add(row);
-                } else if (conflicts == minConflicts) {
-                    bestRows.add(row);
-                }
-            }
-            board[col] = bestRows.get(random.nextInt(bestRows.size()));
-        }
+        return total / 2; // each conflict counted twice
     }
 
     private int countConflicts(int col) {
@@ -124,8 +111,8 @@ public class NQueensSolver {
         return conflicted;
     }
 
-    public void solve() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'solve'");
+    // Other solve methods (if needed) can remain or be removed
+    public int[] getBoard() {
+        return board;
     }
 }
