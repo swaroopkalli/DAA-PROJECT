@@ -1,16 +1,22 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Load the updated CSV file
 df = pd.read_csv("nqueens_all_timings.csv")
 
-plt.plot(df["N"], df["Time_NCSR(ms)"], label='NCSR Only', marker='^', color='blue')
-plt.plot(df["N"], df["Time_MinConflict(ms)"], label='Min-Conflict Only', marker='s', color='red')
-plt.plot(df["N"], df["Time_Hybrid(ms)"], label='Hybrid', marker='o', color='green')
+# Plot each algorithm's timings
+plt.figure(figsize=(10, 6))
+plt.plot(df["N"], df["Time_NCSR(ms)"], label="NCSR Only", marker='o', color='blue')
+plt.plot(df["N"], df["Time_MinConflict(ms)"], label="Min-Conflict", marker='s', color='green')
+plt.plot(df["N"], df["Time_AdaptiveHybrid(ms)"], label="Adaptive Hybrid", marker='^', color='red')
 
-plt.title("N-Queens Time Complexity Comparison")
-plt.xlabel("Board Size (N)")
-plt.ylabel("Execution Time (ms)")
+# Customize the plot
+plt.title("N-Queens Algorithm Time Comparison")
+plt.xlabel("N (Number of Queens)")
+plt.ylabel("Time (ms)")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
+
+# Show the plot
 plt.show()
