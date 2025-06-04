@@ -58,7 +58,7 @@ public class BenchMark {
                                           N, durationNCSR, durationMinConflict, durationHybrid));
             }
 
-            try (PrintWriter writer = new PrintWriter("nqueens_all_timings.csv")) {
+            try (PrintWriter writer = new PrintWriter("nqueens_all_timings_6000.csv")) {
                 for (String line : results) {
                     writer.println(line);
                 }
@@ -66,7 +66,7 @@ public class BenchMark {
 
             JOptionPane.showMessageDialog(
                 null,
-                "Benchmark complete!\nResults saved to nqueens_all_timings.csv",
+                "Benchmark complete!\nResults saved to nqueens_all_timings_6000.csv",
                 "Done",
                 JOptionPane.INFORMATION_MESSAGE
             );

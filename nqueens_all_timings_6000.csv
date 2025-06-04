@@ -1,4 +1,4 @@
-N,Time_NCSR(ms),Time_MinConflict(ms),Time_AdaptiveHybrid(ms)
+N,Time_NCSR(ms),Time_MinConflict(ms),Time_Hybrid(ms)
 0,0.000,0.000,0.000
 1000,1314.437,1974.755,3010.516
 2000,9353.800,12550.150,20450.539
